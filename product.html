@@ -22,7 +22,7 @@ input{width:100%;padding:8px;margin:8px 0;}
     <input type="text" id="address" placeholder="Enter Your Address">
     <input type="text" id="phone" placeholder="Enter Phone Number">
 
-    <button onclick="buyNow()">Buy Now</button>
+    <button id="buyBtn">Buy Now</button>
 </div>
 
 <script type="module">
@@ -44,24 +44,36 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Get selected product
+// Get selected product safely
 const product = JSON.parse(localStorage.getItem("selectedProduct"));
 
-if(product){
+if (!product) {
+  alert("No product selected. Please select product again.");
+  window.location.href = "index.html";
+} else {
   document.getElementById("name").innerText = product.name;
   document.getElementById("desc").innerText = product.desc;
   document.getElementById("price").innerText = "Price: ₹" + product.price;
 }
 
-// Buy Function
-window.buyNow = async function(){
+// Button click event
+document.getElementById("buyBtn").addEventListener("click", async () => {
+
+  const customer = document.getElementById("customerName").value;
+  const address = document.getElementById("address").value;
+  const phone = document.getElementById("phone").value;
+
+  if (!customer || !address || !phone) {
+    alert("Please fill all details");
+    return;
+  }
 
   const order = {
     product: product.name,
     price: product.price,
-    customer: document.getElementById("customerName").value,
-    address: document.getElementById("address").value,
-    phone: document.getElementById("phone").value,
+    customer: customer,
+    address: address,
+    phone: phone,
     payment: "Cash on Delivery",
     status: "Pending",
     createdAt: new Date()
@@ -70,12 +82,13 @@ window.buyNow = async function(){
   try {
     await addDoc(collection(db, "orders"), order);
     alert("Order Placed Successfully!");
-    window.location.href="index.html";
-  } catch(error){
-    alert("Error placing order");
+    window.location.href = "index.html";
+  } catch (error) {
+    alert("Error placing order. Check Firestore rules.");
     console.log(error);
   }
-}
+
+});
 
 </script>
 
