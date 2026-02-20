@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Panel</title>
+<style>
+body{font-family:Arial;background:#f4f6f8;padding:40px;}
+table{width:100%;border-collapse:collapse;background:#fff;}
+th,td{padding:10px;border:1px solid #ddd;text-align:left;}
+th{background:#0f172a;color:#fff;}
+</style>
+</head>
+<body>
+
+<h2>Unaplix Admin Panel</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Customer</th>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Address</th>
+            <th>Phone</th>
+            <th>Payment</th>
+        </tr>
+    </thead>
+    <tbody id="orderList"></tbody>
+</table>
+
+<script>
+let orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+const table = document.getElementById("orderList");
+
+orders.forEach(order=>{
+    table.innerHTML += `
+    <tr>
+        <td>${order.customer}</td>
+        <td>${order.product}</td>
+        <td>₹${order.price}</td>
+        <td>${order.address}</td>
+        <td>${order.phone}</td>
+        <td>${order.payment}</td>
+    </tr>
+    `;
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Product Details</title>
+<style>
+body{font-family:Arial;background:#f4f6f8;padding:40px;}
+.container{background:#fff;padding:30px;border-radius:10px;max-width:500px;margin:auto;box-shadow:0 5px 15px rgba(0,0,0,0.1);}
+button{background:#22c55e;color:#fff;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;margin-top:15px;}
+input{width:100%;padding:8px;margin:8px 0;}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2 id="name"></h2>
+    <p id="desc"></p>
+    <h3 id="price"></h3>
+
+    <h4>Cash on Delivery Only</h4>
+
+    <input type="text" id="customerName" placeholder="Enter Your Name">
+    <input type="text" id="address" placeholder="Enter Your Address">
+    <input type="text" id="phone" placeholder="Enter Phone Number">
+
+    <button onclick="buyNow()">Buy Now</button>
+</div>
+
+<script>
+const product = JSON.parse(localStorage.getItem("selectedProduct"));
+
+document.getElementById("name").innerText = product.name;
+document.getElementById("desc").innerText = product.desc;
+document.getElementById("price").innerText = "Price: ₹" + product.price;
+
+function buyNow(){
+    const order = {
+        product: product.name,
+        price: product.price,
+        customer: document.getElementById("customerName").value,
+        address: document.getElementById("address").value,
+        phone: document.getElementById("phone").value,
+        payment: "Cash on Delivery"
+    };
+
+    let orders = JSON.parse(localStorage.getItem("orders")) || [];
+    orders.push(order);
+    localStorage.setItem("orders", JSON.stringify(orders));
+
+    alert("Order Placed Successfully!");
+    window.location.href="index.html";
+}
+</script>
+
+</body>
+</html>
