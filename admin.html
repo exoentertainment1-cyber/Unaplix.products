@@ -12,6 +12,7 @@ th{background:#0f172a;color:#fff;}
 <body>
 
 <h2>Unaplix Admin Panel</h2>
+
 <table>
     <thead>
         <tr>
@@ -20,29 +21,51 @@ th{background:#0f172a;color:#fff;}
             <th>Price</th>
             <th>Address</th>
             <th>Phone</th>
-            <th>Payment</th>
+            <th>Status</th>
         </tr>
     </thead>
     <tbody id="orderList"></tbody>
 </table>
 
-<script>
-let orders = JSON.parse(localStorage.getItem("orders")) || [];
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyDFrySE90eGW4KKTH0xRCVwdb97EQOY8NE",
+  authDomain: "unaplix-products.firebaseapp.com",
+  projectId: "unaplix-products",
+  storageBucket: "unaplix-products.firebasestorage.app",
+  messagingSenderId: "576487097704",
+  appId: "1:576487097704:web:ee308d4bd0552034dfc2dd"
+};
+
+// Initialize
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 const table = document.getElementById("orderList");
 
-orders.forEach(order=>{
-    table.innerHTML += `
+// Fetch Orders
+const querySnapshot = await getDocs(collection(db, "orders"));
+
+querySnapshot.forEach((doc) => {
+  const order = doc.data();
+
+  table.innerHTML += `
     <tr>
-        <td>${order.customer}</td>
-        <td>${order.product}</td>
-        <td>₹${order.price}</td>
-        <td>${order.address}</td>
-        <td>${order.phone}</td>
-        <td>${order.payment}</td>
+      <td>${order.customer}</td>
+      <td>${order.product}</td>
+      <td>₹${order.price}</td>
+      <td>${order.address}</td>
+      <td>${order.phone}</td>
+      <td>${order.status}</td>
     </tr>
-    `;
+  `;
 });
+
 </script>
 
 </body>
