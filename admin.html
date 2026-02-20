@@ -7,30 +7,48 @@ body{font-family:Arial;background:#f4f6f8;padding:40px;}
 table{width:100%;border-collapse:collapse;background:#fff;}
 th,td{padding:10px;border:1px solid #ddd;text-align:left;}
 th{background:#0f172a;color:#fff;}
+button{padding:5px 10px;margin:2px;border:none;border-radius:4px;cursor:pointer;}
+.deliverBtn{background:green;color:#fff;}
+.cancelBtn{background:red;color:#fff;}
+.pending{color:orange;font-weight:bold;}
+.delivered{color:green;font-weight:bold;}
+.cancelled{color:red;font-weight:bold;}
 </style>
 </head>
 <body>
 
+<script>
+// 🔐 PASSWORD PROTECTION
+const password = prompt("Enter Admin Password:");
+
+if(password !== "madan2009@unaplix"){
+  alert("Wrong Password!");
+  window.location.href = "index.html";
+}
+</script>
+
 <h2>Unaplix Admin Panel</h2>
 
 <table>
-    <thead>
-        <tr>
-            <th>Customer</th>
-            <th>Product</th>
-            <th>Price</th>
-            <th>Address</th>
-            <th>Phone</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody id="orderList"></tbody>
+<thead>
+<tr>
+<th>Customer</th>
+<th>Product</th>
+<th>Price</th>
+<th>Address</th>
+<th>Phone</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="orderList"></tbody>
 </table>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, updateDoc } 
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 // Firebase Config
 const firebaseConfig = {
@@ -42,7 +60,7 @@ const firebaseConfig = {
   appId: "1:576487097704:web:ee308d4bd0552034dfc2dd"
 };
 
-// Initialize
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -51,8 +69,10 @@ const table = document.getElementById("orderList");
 // Fetch Orders
 const querySnapshot = await getDocs(collection(db, "orders"));
 
-querySnapshot.forEach((doc) => {
-  const order = doc.data();
+querySnapshot.forEach((docSnap) => {
+
+  const order = docSnap.data();
+  const id = docSnap.id;
 
   table.innerHTML += `
     <tr>
@@ -61,10 +81,27 @@ querySnapshot.forEach((doc) => {
       <td>₹${order.price}</td>
       <td>${order.address}</td>
       <td>${order.phone}</td>
-      <td>${order.status}</td>
+      <td class="${order.status.toLowerCase()}">${order.status}</td>
+      <td>
+        <button class="deliverBtn" onclick="updateStatus('${id}','Delivered')">Deliver</button>
+        <button class="cancelBtn" onclick="updateStatus('${id}','Cancelled')">Cancel</button>
+      </td>
     </tr>
   `;
 });
+
+// Make function global
+window.updateStatus = async function(id, newStatus){
+
+  const orderRef = doc(db, "orders", id);
+
+  await updateDoc(orderRef, {
+    status: newStatus
+  });
+
+  alert("Status Updated!");
+  location.reload();
+}
 
 </script>
 
