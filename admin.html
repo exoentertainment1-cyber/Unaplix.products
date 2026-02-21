@@ -52,7 +52,6 @@ input{
   border:none;
   border-radius:6px;
   margin-bottom:15px;
-  font-size:14px;
 }
 
 button{
@@ -129,7 +128,7 @@ window.loadDashboard = async function(){
 
   document.getElementById("dashboard").innerHTML = `
   <div style="background:#0f172a;color:white;padding:20px;text-align:center;font-size:22px;font-weight:bold;">
-    UNAPLIX ADMIN DASHBOARD
+    UNAPLIX ADMIN DASHBOARD (Pending Orders)
   </div>
   <div style="padding:20px;">
   <table style="width:100%;background:white;border-collapse:collapse;">
@@ -153,11 +152,15 @@ window.loadDashboard = async function(){
   const querySnapshot = await getDocs(collection(db, "orders"));
 
   querySnapshot.forEach((docSnap) => {
+
     const order = docSnap.data();
     const id = docSnap.id;
 
+    // ✅ Only show Pending
+    if(order.status !== "Pending") return;
+
     table.innerHTML += `
-    <tr>
+    <tr id="row-${id}">
       <td style="padding:10px;">${order.customer}</td>
       <td style="padding:10px;">${order.product}</td>
       <td style="padding:10px;">₹${order.price}</td>
@@ -175,8 +178,12 @@ window.loadDashboard = async function(){
   window.updateStatus = async function(id,newStatus){
     const orderRef = doc(db,"orders",id);
     await updateDoc(orderRef,{status:newStatus});
-    alert("Status Updated");
-    location.reload();
+
+    // ✅ Remove row instantly
+    const row = document.getElementById("row-" + id);
+    if(row){
+      row.remove();
+    }
   }
 }
 </script>
