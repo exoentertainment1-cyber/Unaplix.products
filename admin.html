@@ -3,6 +3,7 @@
 <head>
 <title>Unaplix Admin Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
 body{margin:0;font-family:Arial;background:#f1f5f9;}
 .header{background:#0f172a;color:#fff;padding:20px;text-align:center;font-size:22px;font-weight:bold;}
@@ -11,6 +12,7 @@ body{margin:0;font-family:Arial;background:#f1f5f9;}
 table{width:100%;border-collapse:collapse;}
 th{background:#0f172a;color:#fff;padding:12px;text-align:left;}
 td{padding:12px;border-bottom:1px solid #eee;}
+tr:hover{background:#f9fafb;}
 .badge{padding:5px 10px;border-radius:20px;font-size:12px;font-weight:bold;color:#fff;}
 .pending{background:orange;}
 .delivered{background:green;}
@@ -20,9 +22,16 @@ button{padding:6px 12px;border:none;border-radius:6px;cursor:pointer;font-size:1
 .cancelBtn{background:#dc2626;color:white;}
 </style>
 </head>
+
 <body>
 
-<h1 style="color:red;text-align:center;">NEW ADMIN VERSION</h1>
+<script>
+const password = prompt("Enter Admin Password:");
+if(password !== "madan2009@unaplix"){
+  alert("Wrong Password!");
+  window.location.href="index.html";
+}
+</script>
 
 <div class="header">UNAPLIX ADMIN DASHBOARD</div>
 
@@ -34,20 +43,64 @@ button{padding:6px 12px;border:none;border-radius:6px;cursor:pointer;font-size:1
 <th>Customer</th>
 <th>Product</th>
 <th>Price</th>
+<th>Address</th>
+<th>Phone</th>
 <th>Status</th>
+<th>Action</th>
 </tr>
 </thead>
-<tbody>
-<tr>
-<td>Test User</td>
-<td>Test Product</td>
-<td>₹999</td>
-<td><span class="badge pending">Pending</span></td>
-</tr>
-</tbody>
+<tbody id="orderList"></tbody>
 </table>
 </div>
 </div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, updateDoc } 
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDFrySE90eGW4KKTH0xRCVwdb97EQOY8NE",
+  authDomain: "unaplix-products.firebaseapp.com",
+  projectId: "unaplix-products",
+  storageBucket: "unaplix-products.firebasestorage.app",
+  messagingSenderId: "576487097704",
+  appId: "1:576487097704:web:ee308d4bd0552034dfc2dd"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const table = document.getElementById("orderList");
+
+const querySnapshot = await getDocs(collection(db, "orders"));
+
+querySnapshot.forEach((docSnap) => {
+  const order = docSnap.data();
+  const id = docSnap.id;
+
+  table.innerHTML += `
+  <tr>
+    <td>${order.customer}</td>
+    <td>${order.product}</td>
+    <td>₹${order.price}</td>
+    <td>${order.address}</td>
+    <td>${order.phone}</td>
+    <td><span class="badge ${order.status.toLowerCase()}">${order.status}</span></td>
+    <td>
+      <button class="deliverBtn" onclick="updateStatus('${id}','Delivered')">Deliver</button>
+      <button class="cancelBtn" onclick="updateStatus('${id}','Cancelled')">Cancel</button>
+    </td>
+  </tr>
+  `;
+});
+
+window.updateStatus = async function(id, newStatus){
+  const orderRef = doc(db, "orders", id);
+  await updateDoc(orderRef, { status: newStatus });
+  alert("Status Updated!");
+  location.reload();
+}
+</script>
 
 </body>
 </html>
