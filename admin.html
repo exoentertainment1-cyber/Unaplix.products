@@ -1,58 +1,113 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Unaplix Admin Dashboard</title>
+<title>Unaplix Secure Admin</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{margin:0;font-family:Arial;background:#f1f5f9;}
-.header{background:#0f172a;color:#fff;padding:20px;text-align:center;font-size:22px;font-weight:bold;}
-.container{padding:30px;}
-.card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,0.08);overflow-x:auto;}
-table{width:100%;border-collapse:collapse;}
-th{background:#0f172a;color:#fff;padding:12px;text-align:left;}
-td{padding:12px;border-bottom:1px solid #eee;}
-tr:hover{background:#f9fafb;}
-.badge{padding:5px 10px;border-radius:20px;font-size:12px;font-weight:bold;color:#fff;}
-.pending{background:orange;}
-.delivered{background:green;}
-.cancelled{background:red;}
-button{padding:6px 12px;border:none;border-radius:6px;cursor:pointer;font-size:12px;margin:2px;}
-.deliverBtn{background:#16a34a;color:white;}
-.cancelBtn{background:#dc2626;color:white;}
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1600&q=80') no-repeat center center/cover;
+}
+
+.overlay{
+  background:rgba(0,0,0,0.85);
+  width:100%;
+  height:100%;
+  position:absolute;
+  top:0;
+  left:0;
+}
+
+.login-box{
+  position:relative;
+  z-index:2;
+  background:rgba(15,23,42,0.95);
+  padding:40px;
+  border-radius:15px;
+  width:300px;
+  text-align:center;
+  box-shadow:0 0 30px rgba(0,255,255,0.3);
+}
+
+.lock{
+  font-size:50px;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#fff;
+  margin-bottom:20px;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:6px;
+  margin-bottom:15px;
+  font-size:14px;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:6px;
+  background:#00ffff;
+  color:#000;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+button:hover{
+  background:#00cccc;
+}
+
+.error{
+  color:red;
+  font-size:13px;
+  margin-top:10px;
+}
 </style>
 </head>
 
 <body>
 
+<div class="overlay"></div>
+
+<div class="login-box" id="loginPage">
+  <div class="lock">🔐</div>
+  <h2>Admin Secure Login</h2>
+  <input type="password" id="password" placeholder="Enter Admin Password">
+  <button onclick="login()">Login</button>
+  <div class="error" id="errorMsg"></div>
+</div>
+
+<div id="dashboard" style="display:none;">
+  <!-- Your existing admin dashboard will appear here -->
+</div>
+
 <script>
-const password = prompt("Enter Admin Password:");
-if(password !== "madan2009@unaplix"){
-  alert("Wrong Password!");
-  window.location.href="index.html";
+function login(){
+  const pass = document.getElementById("password").value;
+  const error = document.getElementById("errorMsg");
+
+  if(pass === "madan2009@unaplix"){
+      document.getElementById("loginPage").style.display="none";
+      document.getElementById("dashboard").style.display="block";
+      loadDashboard();
+  } else {
+      error.innerText = "❌ Incorrect Password";
+  }
 }
 </script>
-
-<div class="header">UNAPLIX ADMIN DASHBOARD</div>
-
-<div class="container">
-<div class="card">
-<table>
-<thead>
-<tr>
-<th>Customer</th>
-<th>Product</th>
-<th>Price</th>
-<th>Address</th>
-<th>Phone</th>
-<th>Status</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody id="orderList"></tbody>
-</table>
-</div>
-</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
@@ -70,35 +125,56 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const table = document.getElementById("orderList");
 
-const querySnapshot = await getDocs(collection(db, "orders"));
+window.loadDashboard = async function(){
 
-querySnapshot.forEach((docSnap) => {
-  const order = docSnap.data();
-  const id = docSnap.id;
-
-  table.innerHTML += `
-  <tr>
-    <td>${order.customer}</td>
-    <td>${order.product}</td>
-    <td>₹${order.price}</td>
-    <td>${order.address}</td>
-    <td>${order.phone}</td>
-    <td><span class="badge ${order.status.toLowerCase()}">${order.status}</span></td>
-    <td>
-      <button class="deliverBtn" onclick="updateStatus('${id}','Delivered')">Deliver</button>
-      <button class="cancelBtn" onclick="updateStatus('${id}','Cancelled')">Cancel</button>
-    </td>
+  document.getElementById("dashboard").innerHTML = `
+  <div style="background:#0f172a;color:white;padding:20px;text-align:center;font-size:22px;font-weight:bold;">
+    UNAPLIX ADMIN DASHBOARD
+  </div>
+  <div style="padding:20px;">
+  <table style="width:100%;background:white;border-collapse:collapse;">
+  <thead>
+  <tr style="background:#0f172a;color:white;">
+  <th style="padding:10px;">Customer</th>
+  <th style="padding:10px;">Product</th>
+  <th style="padding:10px;">Price</th>
+  <th style="padding:10px;">Status</th>
+  <th style="padding:10px;">Action</th>
   </tr>
+  </thead>
+  <tbody id="orderList"></tbody>
+  </table>
+  </div>
   `;
-});
 
-window.updateStatus = async function(id, newStatus){
-  const orderRef = doc(db, "orders", id);
-  await updateDoc(orderRef, { status: newStatus });
-  alert("Status Updated!");
-  location.reload();
+  const table = document.getElementById("orderList");
+  const querySnapshot = await getDocs(collection(db, "orders"));
+
+  querySnapshot.forEach((docSnap) => {
+    const order = docSnap.data();
+    const id = docSnap.id;
+
+    table.innerHTML += `
+    <tr>
+      <td style="padding:10px;">${order.customer}</td>
+      <td style="padding:10px;">${order.product}</td>
+      <td style="padding:10px;">₹${order.price}</td>
+      <td style="padding:10px;">${order.status}</td>
+      <td style="padding:10px;">
+        <button onclick="updateStatus('${id}','Delivered')">Deliver</button>
+        <button onclick="updateStatus('${id}','Cancelled')">Cancel</button>
+      </td>
+    </tr>
+    `;
+  });
+
+  window.updateStatus = async function(id,newStatus){
+    const orderRef = doc(db,"orders",id);
+    await updateDoc(orderRef,{status:newStatus});
+    alert("Status Updated");
+    location.reload();
+  }
 }
 </script>
 
